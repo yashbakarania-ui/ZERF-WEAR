@@ -1,0 +1,356 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  STAFF
+}
+
+enum ImageViewType {
+  FRONT
+  BACK
+  DETAIL
+  LIFESTYLE
+}
+
+enum OrderStatus {
+  ORDER_REQUESTED
+  UNDER_REVIEW
+  QUOTATION_SENT
+  AWAITING_APPROVAL
+  CONFIRMED
+  PROCESSING
+  IN_PRODUCTION
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum InventoryMovementType {
+  RESTOCK
+  RESERVED
+  FULFILLED
+  DAMAGED_RETURN
+  AUDIT_CORRECTION
+}
+
+enum EnquiryStatus {
+  NEW
+  IN_REVIEW
+  QUOTED
+  SAMPLE_APPROVED
+  CONVERTED
+  REJECTED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_PAISE
+}
+
+enum ShipmentStatus {
+  PENDING
+  LABEL_CREATED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED_ATTEMPT
+  RETURNED
+}
+
+model User {
+  id               String             @id @default(cuid())
+  email            String             @unique
+  passwordHash     String?
+  name             String?
+  phone            String?
+  role             String             @default("CUSTOMER")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  addresses        Address[]
+  orders           Order[]
+  customEnquiries  CustomEnquiry[]
+  b2bEnquiries     B2BEnquiry[]
+  couponRedemptions CouponRedemption[]
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String?
+  fullName     String
+  phone        String
+  line1        String
+  line2        String?
+  landmark     String?
+  city         String
+  state        String
+  postalCode   String
+  country      String   @default("India")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orders       Order[]
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  description String?
+  imageUrl    String?
+  parentId    String?
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  products    Product[]
+}
+
+model Product {
+  id               String           @id @default(cuid())
+  slug             String           @unique
+  title            String
+  subtitle         String?
+  description      String
+  fabricDetails    String?
+  careInstructions String?
+  basePriceInPaise Int
+  isFeatured       Boolean          @default(false)
+  isActive         Boolean          @default(true)
+  isB2BEligible    Boolean          @default(true)
+  categoryId       String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  category         Category         @relation(fields: [categoryId], references: [id])
+  images           ProductImage[]
+  variants         ProductVariant[]
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  altText   String?
+  sortOrder Int      @default(0)
+  viewType  String   @default("FRONT")
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductVariant {
+  id                    String              @id @default(cuid())
+  productId             String
+  sku                   String              @unique
+  size                  String
+  colorName             String
+  colorHex              String
+  priceAdjustmentInPaise Int                @default(0)
+  stockQuantity         Int                 @default(0)
+  minOrderQuantity      Int                 @default(1)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  product               Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryMovements    InventoryMovement[]
+  orderItems            OrderItem[]
+}
+
+model InventoryMovement {
+  id          String   @id @default(cuid())
+  variantId   String
+  type        String
+  quantity    Int
+  balance     Int
+  note        String?
+  referenceId String?
+  createdAt   DateTime @default(now())
+
+  variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id                 String               @id @default(cuid())
+  referenceNumber    String               @unique
+  userId             String?
+  customerName       String
+  customerEmail      String
+  customerPhone      String
+  deliveryAddressId  String?
+  status             String               @default("ORDER_REQUESTED")
+  subtotalInPaise    Int
+  discountInPaise    Int                  @default(0)
+  shippingFeeInPaise Int                  @default(0)
+  taxInPaise         Int                  @default(0)
+  totalAmountInPaise Int
+  couponCode         String?
+  notes              String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  user               User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  deliveryAddress    Address?             @relation(fields: [deliveryAddressId], references: [id], onDelete: SetNull)
+  items              OrderItem[]
+  statusHistory      OrderStatusHistory[]
+  shipment           Shipment?
+  adminNotes         AdminNote[]
+}
+
+model OrderItem {
+  id                 String         @id @default(cuid())
+  orderId            String
+  variantId          String
+  productTitle       String
+  size               String
+  colorName          String
+  unitPriceInPaise   Int
+  quantity           Int
+  totalPriceInPaise  Int
+
+  order              Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant            ProductVariant @relation(fields: [variantId], references: [id])
+}
+
+model OrderStatusHistory {
+  id          String   @id @default(cuid())
+  orderId     String
+  fromStatus  String?
+  toStatus    String
+  comment     String?
+  createdBy   String   @default("SYSTEM")
+  createdAt   DateTime @default(now())
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Shipment {
+  id                String    @id @default(cuid())
+  orderId           String    @unique
+  courierName       String
+  trackingNumber    String
+  trackingUrl       String?
+  status            String    @default("PENDING")
+  dispatchDate      DateTime?
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  order             Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model CustomEnquiry {
+  id                  String   @id @default(cuid())
+  enquiryNumber       String   @unique
+  userId              String?
+  customerName        String
+  customerPhone       String
+  customerEmail       String
+  apparelCategory     String
+  estimatedQty        Int
+  printMethod         String?
+  sizeBreakdown       String?
+  colorPreferences    String?
+  notes               String?
+  artworkUrls         String?
+  whatsappText        String?
+  quotedAmountInPaise Int?
+  status              String   @default("NEW")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model B2BEnquiry {
+  id                  String    @id @default(cuid())
+  enquiryNumber       String    @unique
+  userId              String?
+  companyName         String
+  contactPerson       String
+  designation         String?
+  gstin               String?
+  email               String
+  phone               String
+  category            String
+  quantity            Int
+  budgetRange         String?
+  deadlineDate        DateTime?
+  deliveryCity        String
+  deliveryPincode     String?
+  requirements        String
+  quotedAmountInPaise Int?
+  status              String    @default("NEW")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user                User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Coupon {
+  id                   String             @id @default(cuid())
+  code                 String             @unique
+  discountType         String
+  discountValue        Int
+  minOrderValueInPaise Int                @default(0)
+  maxDiscountInPaise   Int?
+  usageLimit           Int?
+  usageCount           Int                @default(0)
+  startDate            DateTime           @default(now())
+  endDate              DateTime?
+  isActive             Boolean            @default(true)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  redemptions          CouponRedemption[]
+}
+
+model CouponRedemption {
+  id         String   @id @default(cuid())
+  couponId   String
+  userId     String?
+  orderId    String?
+  redeemedAt DateTime @default(now())
+
+  coupon     Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model AdminNote {
+  id         String   @id @default(cuid())
+  orderId    String
+  authorName String
+  note       String
+  isInternal Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model StoreSettings {
+  id                           String   @id @default("default")
+  storeName                    String   @default("ZARF Wear")
+  whatsappNumber               String   @default("+919876543210")
+  supportEmail                 String   @default("support@zarfwear.in")
+  supportPhone                 String   @default("+918000000000")
+  address                      String   @default("ZARF Studios, Industrial Fashion District, Mumbai, MH, 400013")
+  freeShippingThresholdInPaise Int      @default(199900)
+  standardShippingFeeInPaise   Int      @default(9900)
+  b2bMinimumOrderQuantity      Int      @default(25)
+  orderPrefix                  String   @default("ZRF")
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+}
+

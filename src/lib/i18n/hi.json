@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "shop": "Dukaan",
+    "allProducts": "Sabhi Pieces",
+    "oversized": "Oversized Tees",
+    "hoodies": "Hoodies & Sweats",
+    "polos": "Polo T-Shirts",
+    "caps": "Caps & Hats",
+    "custom": "Custom Printing",
+    "b2b": "Corporate & Bulk",
+    "about": "Humari Kahani",
+    "contact": "Sampark",
+    "track": "Order Track Karein",
+    "search": "Dhoondiye...",
+    "bag": "Bag"
+  },
+  "hero": {
+    "eyebrow": "AUTUMN / WINTER 2026 EDITORIAL",
+    "title": "UNCONVENTIONAL FIT, BESPOKE CRAFT",
+    "description": "240+ GSM heavyweight fabrics, architectural drop-shoulder cuts, aur India ka finest custom merchandise experience.",
+    "exploreCta": "Collection Dekhein",
+    "customCta": "Custom & Bulk Enquiries"
+  },
+  "ticker": {
+    "tag1": "280 GSM HEAVYWEIGHT COMBED COTTON",
+    "tag2": "PAN-INDIA EXPRESS DELIVERY",
+    "tag3": "BESPOKE SCREEN & PUFF PRINTING",
+    "tag4": "100% TRANSPARENT PRICING",
+    "tag5": "PREMIUM INDIAN MANUFACTURING"
+  },
+  "catalog": {
+    "title": "CATALOGUE",
+    "filter": "Filters",
+    "sortBy": "Sort Karein",
+    "sortFeatured": "Khaas Chune Hue",
+    "sortPriceAsc": "Price: Kam se Zyada",
+    "sortPriceDesc": "Price: Zyada se Kam",
+    "allCategories": "Sabhi Categories",
+    "inStock": "Available Stock Only",
+    "priceRange": "Price Range",
+    "noProducts": "Koi product nahi mila."
+  },
+  "product": {
+    "addToBag": "Order Request Mein Dalein",
+    "requestCustom": "Custom Branding Enquiry",
+    "selectSize": "Size Chunein",
+    "selectColor": "Rang Chunein",
+    "sizeGuide": "Size Chart",
+    "fabricSpecs": "Fabric & Details",
+    "careGuide": "Dhulai & Sambhal",
+    "stockLeft": "pieces bache hain",
+    "outOfStock": "Stock Khatam"
+  },
+  "cart": {
+    "title": "Shopping Bag",
+    "empty": "Aapka shopping bag khali hai.",
+    "startShopping": "Collection Dekhein",
+    "subtotal": "Subtotal",
+    "shipping": "Delivery",
+    "shippingFree": "Muft (Pan-India)",
+    "coupon": "Coupon Code",
+    "apply": "Apply Karein",
+    "total": "Estimated Total",
+    "orderRequestNotice": "Online payment abhi nahi karni. Ye official Order Request hai. Hamari concierge team stock check karke aapse sampark karegi.",
+    "proceedCta": "Order Request Aage Badhayein"
+  },
+  "orderRequest": {
+    "title": "Order Request Bhejein",
+    "step1": "1. Aapka Naam & WhatsApp",
+    "step2": "2. Pan-India Delivery Pata",
+    "step3": "3. Review & Zaruri Baatein",
+    "submit": "Order Request Submit Karein",
+    "successTitle": "Order Request Successfully Submit Ho Gayi!",
+    "reference": "Reference Code",
+    "trackOrder": "Order Status Track Karein",
+    "sendWhatsapp": "WhatsApp Par Confirm Karein"
+  }
+}
+
